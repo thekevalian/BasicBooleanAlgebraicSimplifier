@@ -1,11 +1,11 @@
 PROJECT = BLS
 CC = g++
-CPPFLAGS = -g
+CPPFLAGS = -g #-static <- better used when finished, debugging with -static is a bad idea
 FILES = $(wildcard *.cpp)
 LIBS =
 
 $(PROJECT): $(FILES)
-	$(CC) -o $@ $^ $(LIBS) $(CPPFLAGS) -static
+	$(CC) -o $@ $^ $(LIBS) $(CPPFLAGS)
 
 clean:
 	rm -rf $(PROJECT)
