@@ -63,6 +63,10 @@ dubitmap::dubitmap(std::string in, char index2, char index3) : capacity((MIN_ALL
     }
 }
 
+// dubitmap::dubitmap(uint32_t convertTodubit){
+
+// }
+
 /* Free data */
 dubitmap::~dubitmap(){
     if(this->data){
