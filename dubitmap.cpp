@@ -18,6 +18,18 @@ bool dubitmap::resize(uint32_t new_cap){
     return true;
 }
 
+/* creates a dubitmap out of a 32 bit value (32 bits -> 32 dubits)*/
+dubitmap::dubitmap(uint32_t in) : capacity((MIN_ALLOC_CAP+32)<<2), len(0){
+    this->data = new uint8_t[this->capacity];
+    for(uint32_t i  = 0; i < 32; i++){*this += (in>>i)&0b1;}
+}
+
+/* creates a dubitmap out of a 16 bit value (16 bits->16 dubits)*/
+dubitmap::dubitmap(uint16_t in) : capacity((MIN_ALLOC_CAP+16)<<2), len(0){
+    this->data = new uint8_t[this->capacity];
+    for(uint32_t i  = 0; i < 16; i++){*this += (in>>i)&0b1;}
+}
+
 /* Creates a dubitmap where (X) => 10 and (-) => 11 all other values raise an error*/
 dubitmap::dubitmap(std::string in) : capacity((MIN_ALLOC_CAP+in.length())<<2), len(0){
     this->data = new uint8_t[this->capacity];
@@ -105,26 +117,25 @@ dubitmap::dubitmap(const dubitmap& other){
 }
 
 /* See the value of any dubit */
-uint8_t dubitmap::operator()(uint32_t index) const{
+uint2_t dubitmap::operator()(uint32_t index) const{
     assert(index < len && "Array out of bounds");
     return ((data[index>>2]>>(2*(index&0b11))) &0b11);
 }
 
 /* Prints out all the values of the dubitmap in order with spaces in between*/
 std::ostream& operator<<(std::ostream& os, const dubitmap& obj) {        
-        for(uint32_t i = 0; i<obj.length(); i++){
-            os << (static_cast<uint16_t>(obj(i))) << " "; // static_cast(uint8_t) does not work. Not sure but I think compiler views it as a character
+        for(int32_t i = obj.length()-1; i>=0; i--){
+            os << (obj(i)) << " "; // static_cast(uint8_t) does not work. Not sure but I think compiler views it as a character
         }
         return os;
     }
 
 /* Adds a dubit to the end of the dubitmap*/
-void dubitmap::push_back_dubit(uint8_t new_val){
-    assert(new_val<4 && "Adding a value to dubitmap that is not two bit representable");
+void dubitmap::push_back_dubit(uint2_t new_val){
     if(capacity == 0) resize(MIN_ALLOC_CAP);
     if(len + 1 >= capacity) resize(capacity*2);
     len++;
-    change_dubit(len-1, new_val);
+    change_dubit(len-1, new_val.val);
 }
 
 /* Appends the dubitmap */
@@ -137,14 +148,14 @@ dubitmap& dubitmap::operator+=(dubitmap& other){
 }
 
 /* Adds a dubit to the end of the dubitmap */
-dubitmap& dubitmap::operator+=(uint8_t new_val){
+dubitmap& dubitmap::operator+=(uint2_t new_val){
     push_back_dubit(new_val);
     return *this;
 }
 
-void dubitmap::change_dubit(uint32_t index, uint8_t val){
+void dubitmap::change_dubit(uint32_t index, uint2_t new_val){
     assert(index < len && "Out of bounds access");
-    switch (val)
+    switch (new_val.val)
         {
             case 0b00:
                 data[index>>2]&= ~(0b11<< (2*(index&DUBIT_MASK)));

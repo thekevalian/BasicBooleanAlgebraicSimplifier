@@ -17,7 +17,7 @@ namespace KOS{
         uint2_t(int16_t in) : val(in&0b11){};
         ~uint2_t(){};
         uint2_t operator+(const uint2_t& a){return (this->val+a.val)&0b11;}
-        uint2_t& operator=(const uint2_t& other){val=other.val; return *this;};
+        uint2_t& operator=(const uint2_t& other){val=other.val&0b11; return *this;};
         uint2_t& operator+=(const uint2_t& a){this->val = (this->val+a.val)&0b11; return *this;};
         uint2_t operator-(const uint2_t& a){return (this->val-a.val)&0b11;}
         uint2_t& operator-=(const uint2_t& a){this->val = (this->val-a.val)&0b11; return *this;};
@@ -30,10 +30,19 @@ namespace KOS{
         uint2_t& operator>>=(const uint8_t& a){this->val = (this->val>>a)&0b11; return *this;}
         uint2_t& operator>>=(const uint2_t& a){this->val = (this->val>>a.val)&0b11; return *this;}
         bool operator&&(const uint2_t& a){return this->val&&a.val;};
-        uint2_t operator&(const uint2_t& a){return this->val&a.val;}
+        bool operator||(const uint2_t& a){return this->val||a.val;};
+        bool operator==(const uint2_t& a){return this->val==a.val;};
+        bool operator!=(const uint2_t& a){return this->val!=a.val;};
+        bool operator<=(const uint2_t& a){return this->val<=a.val;};
+        bool operator>=(const uint2_t& a){return this->val>=a.val;};
+        bool operator<(const uint2_t& a){return this->val<a.val;};
+        bool operator>(const uint2_t& a){return this->val>a.val;};
+        uint2_t operator&(const uint2_t& a){return this->val&a.val;};
         uint2_t& operator&=(const uint2_t& a){this->val = this->val&a.val; return *this;};
         uint2_t operator|(const uint2_t& a){return this->val|a.val;};
         uint2_t& operator|=(const uint2_t& a){this->val = this->val|a.val; return *this;};
+        friend std::ostream& operator<<(std::ostream& os, const uint2_t& a){os << static_cast<char>(a.val+'0'); return os;};
+        explicit operator bool() const{return val!=0;};
     };
 
     class dubitmap
@@ -51,8 +60,11 @@ namespace KOS{
             ~dubitmap();
             dubitmap& operator=(const dubitmap& other);
 
-            /* Converts a 32 bit value to 64 dubits */
-            // dubitmap::dubitmap(uint32_t convertTodubit);
+            /* creates a dubitmap out of a 32 bit value (32 bits -> 32 dubits)*/
+            dubitmap(uint32_t in);
+
+            /* creates a dubitmap out of a 16 bit value (16 bits->16 dubits)*/
+            dubitmap(uint16_t in);
 
             /* Creates a dubitmap where (X) => 10 and (-) => 11 all other values raise an error*/
             dubitmap(std::string in);
@@ -67,19 +79,19 @@ namespace KOS{
             uint32_t length() const;
 
             /* Appends dubit to the dubitmap*/
-            void push_back_dubit(uint8_t new_val);
+            void push_back_dubit(uint2_t new_val);
 
             /* See the value of a dubit */
-            uint8_t operator()(uint32_t index) const;     
+            uint2_t operator()(uint32_t index) const;     
 
             /* Appends a dubitmap */
             dubitmap& operator+=(dubitmap& other);
 
             /* Appends a single dubit */
-            dubitmap& operator+=(uint8_t new_val);
+            dubitmap& operator+=(uint2_t new_val);
 
             /* Sets index to val */
-            void change_dubit(uint32_t index, uint8_t val);
+            void change_dubit(uint32_t index, uint2_t new_val);
 
             /* Compare two dubitmaps*/
             bool operator==(const dubitmap& other) const;
